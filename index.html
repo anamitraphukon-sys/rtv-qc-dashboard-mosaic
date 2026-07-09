@@ -1,0 +1,1630 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RTV QC Analytics Dashboard</title>
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --panel: #ffffff;
+      --soft: #f8fafc;
+      --ink: #172033;
+      --muted: #667085;
+      --faint: #8a94ab;
+      --line: #d8dee9;
+      --blue: #3b73f6;
+      --green: #10b981;
+      --red: #f04438;
+      --amber: #f59e0b;
+      --teal: #14b8a6;
+      --purple: #7c3aed;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    .app {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 26px 46px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: #2e78dd;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .meta {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: #344054;
+      border-radius: 999px;
+      height: 34px;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .pill.green {
+      background: #e8faf2;
+      border-color: #a7f3d0;
+      color: #087b55;
+    }
+
+    .pill.blue {
+      background: #eef4ff;
+      border-color: #c7d7fe;
+      color: #2356d6;
+    }
+
+    .pill.solid-green {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .status-text {
+      color: #7a8497;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 7px;
+      background: #eef1f6;
+      border: 1px solid #e2e7f0;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .tab {
+      min-width: 148px;
+      height: 36px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: #596174;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+    }
+
+    .control-panel {
+      display: grid;
+      grid-template-columns: 220px 390px 1fr;
+      gap: 18px;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 22px;
+    }
+
+    .control-block {
+      min-width: 0;
+      border-right: 1px solid var(--line);
+      padding-right: 18px;
+      min-height: 58px;
+    }
+
+    .control-block:last-child {
+      border-right: 0;
+      padding-right: 0;
+    }
+
+    .label {
+      color: var(--faint);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .period-title {
+      margin-top: 7px;
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .period-sub {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .segmented {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 13px;
+    }
+
+    .seg {
+      height: 34px;
+      padding: 0 20px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--soft);
+      color: #344054;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .seg.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .select, .search {
+      width: 100%;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--soft);
+      color: #344054;
+      padding: 0 16px;
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 800;
+      outline: none;
+    }
+
+    .search {
+      font-weight: 600;
+    }
+
+    .custom-dates {
+      display: none;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .custom-dates.show {
+      display: flex;
+    }
+
+    .date-input {
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 8px;
+      color: #344054;
+      font-size: 12px;
+      min-width: 0;
+      width: 50%;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .kpi-grid {
+      grid-template-columns: repeat(4, 1fr);
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .card-pad {
+      padding: 18px;
+    }
+
+    .accent {
+      height: 5px;
+      background: var(--blue);
+    }
+
+    .accent.red { background: var(--red); }
+    .accent.amber { background: var(--amber); }
+    .accent.green { background: var(--green); }
+    .accent.teal { background: var(--teal); }
+    .accent.purple { background: var(--purple); }
+
+    .metric-label {
+      color: var(--faint);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric {
+      margin-top: 10px;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .metric-note {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .two-col {
+      grid-template-columns: 1.25fr 0.75fr;
+      margin-bottom: 18px;
+    }
+
+    .equal-col {
+      grid-template-columns: 1fr 1fr;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 950;
+    }
+
+    .section-sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .brand-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .brand-card {
+      background: #fbfcff;
+      border: 1px solid #e4e9f2;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .brand-inner {
+      padding: 14px;
+    }
+
+    .brand-name {
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .brand-cat {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .brand-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+      align-items: end;
+    }
+
+    .stat-val {
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .stat-val.red { color: var(--red); }
+    .stat-val.amber { color: var(--amber); }
+
+    .stat-label {
+      color: var(--faint);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .stat-note {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .bar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #e8ecf2;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: 999px;
+      min-width: 2px;
+    }
+
+    .brand-bar {
+      margin-top: 18px;
+    }
+
+    .signal-row {
+      display: grid;
+      grid-template-columns: 14px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid #e6ebf2;
+    }
+
+    .signal-row:last-child {
+      border-bottom: 0;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .dot.red { background: var(--red); }
+    .dot.amber { background: var(--amber); }
+    .dot.teal { background: var(--teal); }
+
+    .signal-title {
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .signal-sub {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .signal-val {
+      font-size: 12px;
+      font-weight: 950;
+      text-align: right;
+    }
+
+    .reason-row {
+      display: grid;
+      grid-template-columns: 142px 1fr 72px;
+      gap: 14px;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    .reason-label {
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .reason-val {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .comm-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .mini-card {
+      border: 1px solid #e4e9f2;
+      border-radius: 12px;
+      background: #fbfcff;
+      padding: 14px;
+    }
+
+    .mini-val {
+      font-size: 24px;
+      font-weight: 950;
+    }
+
+    .mini-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .channel-layout {
+      display: grid;
+      grid-template-columns: 520px 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .channel-row {
+      display: grid;
+      grid-template-columns: 135px 66px 110px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 13px 10px;
+      border-bottom: 1px solid #e6ebf2;
+      cursor: pointer;
+      border-radius: 12px;
+    }
+
+    .channel-row:hover, .channel-row.active {
+      background: #eef4ff;
+      border-color: #c7d7fe;
+    }
+
+    .channel-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .channel-accordion {
+      border: 1px solid #e4e9f2;
+      border-radius: 14px;
+      background: #fbfcff;
+      overflow: hidden;
+    }
+
+    .channel-accordion summary {
+      display: grid;
+      grid-template-columns: minmax(170px, 1.5fr) repeat(3, minmax(100px, 0.8fr)) minmax(150px, 1fr) 92px;
+      gap: 14px;
+      align-items: center;
+      padding: 15px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .channel-accordion summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .summary-metric span {
+      display: block;
+      color: var(--faint);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .summary-metric strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 950;
+    }
+
+    .summary-metric small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .expand-label {
+      justify-self: end;
+      border: 1px solid #c7d7fe;
+      background: #eef4ff;
+      color: #2356d6;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .channel-reason-panel {
+      border-top: 1px solid #e4e9f2;
+      background: #fff;
+      padding: 16px;
+    }
+
+    .row-title {
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .row-sub {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .badge {
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+      min-height: 24px;
+      max-width: 150px;
+      border: 1px solid #e2e8f0;
+      border-radius: 999px;
+      background: var(--soft);
+      padding: 0 9px;
+      font-size: 10px;
+      font-weight: 900;
+      color: #344054;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .detail-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+      margin-bottom: 22px;
+    }
+
+    .detail-kpi {
+      border: 1px solid #e4e9f2;
+      border-radius: 12px;
+      background: #fbfcff;
+      overflow: hidden;
+    }
+
+    .detail-kpi .body {
+      padding: 12px;
+    }
+
+    .detail-value {
+      margin-top: 8px;
+      font-size: 24px;
+      font-weight: 950;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th {
+      text-align: left;
+      color: var(--faint);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 12px 10px;
+      border-bottom: 1px solid #e6ebf2;
+    }
+
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e6ebf2;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .segment-bar {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      min-width: 260px;
+    }
+
+    .segment {
+      height: 12px;
+      border-radius: 999px;
+      min-width: 12px;
+    }
+
+    .product-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .product-row {
+      display: grid;
+      grid-template-columns: 1fr 70px 120px 100px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 8px;
+      border-bottom: 1px solid #e6ebf2;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .product-row:hover, .product-row.active {
+      background: #eef4ff;
+      border-color: #c7d7fe;
+    }
+
+    .truncate {
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .product-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 12px 0 18px;
+    }
+
+    .download-btn {
+      border: 1px solid #c7d7fe;
+      background: #eef4ff;
+      color: #2356d6;
+      border-radius: 999px;
+      height: 34px;
+      padding: 0 16px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .error {
+      display: none;
+      background: #fff7f7;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 18px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    @media (max-width: 1100px) {
+      .control-panel, .kpi-grid, .two-col, .equal-col, .channel-layout, .product-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .control-block {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        padding-right: 0;
+        padding-bottom: 14px;
+      }
+
+      .control-block:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .brand-grid, .comm-grid, .detail-kpis {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .app { padding: 18px 12px 34px; }
+      .header { flex-direction: column; }
+      .header-actions { justify-content: flex-start; }
+      h1 { font-size: 22px; }
+      .channel-row { grid-template-columns: 1fr 70px; }
+      .channel-accordion summary { grid-template-columns: 1fr; }
+      .expand-label { justify-self: start; }
+      .product-row { grid-template-columns: 1fr 62px; }
+      .hide-mobile { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">RTV</div>
+        <div>
+          <h1>RTV QC Analytics Dashboard</h1>
+          <div class="meta" id="metaText">Loading live QC data...</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="pill green">Auto-refresh ON</span>
+        <span class="status-text" id="countdownText">Next: 5:00</span>
+        <button class="pill solid-green" id="refreshBtn" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Dashboard tabs">
+      <button class="tab active" type="button" data-tab="overview">Overview</button>
+      <button class="tab" type="button" data-tab="channels">Channel Analysis</button>
+      <button class="tab" type="button" data-tab="skus">SKU Deep-Dive</button>
+    </nav>
+
+    <section class="control-panel">
+      <div class="control-block">
+        <div class="label">Report period</div>
+        <div class="period-title" id="periodTitle">Last completed week</div>
+        <div class="period-sub" id="periodSub">-</div>
+      </div>
+      <div class="control-block">
+        <div class="label">Period type</div>
+        <div class="segmented">
+          <button class="seg active" type="button" data-period="week">Week</button>
+          <button class="seg" type="button" data-period="month">Month</button>
+          <button class="seg" type="button" data-period="quarter">Quarter</button>
+          <button class="seg" type="button" data-period="custom">Custom</button>
+        </div>
+      </div>
+      <div class="control-block">
+        <div class="label" id="selectorLabel">Selected period</div>
+        <select class="select" id="periodSelect"></select>
+        <div class="custom-dates" id="customDates">
+          <input class="date-input" id="startDate" type="date" />
+          <input class="date-input" id="endDate" type="date" />
+        </div>
+      </div>
+    </section>
+
+    <div class="error" id="errorBox"></div>
+
+    <main>
+      <section class="panel active" id="overviewPanel">
+        <div class="grid kpi-grid" id="overviewKpis"></div>
+
+        <div class="grid two-col">
+          <div class="card card-pad">
+            <h2 class="section-title">Brand health</h2>
+            <div class="brand-grid" id="brandHealth"></div>
+          </div>
+          <div class="card card-pad">
+            <h2 class="section-title">What needs attention</h2>
+            <div id="attentionList"></div>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-bottom:18px">
+          <h2 class="section-title">Top reasons overall</h2>
+          <div id="topReasons"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="channelsPanel">
+        <div class="card card-pad" style="margin-bottom:18px">
+          <div style="display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap">
+            <div>
+              <h2 class="section-title">Channel Analysis</h2>
+            </div>
+            <button class="download-btn" type="button" id="downloadChannelCsv">Download CSV</button>
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <h2 class="section-title">Channel breakdown</h2>
+          <div class="channel-list" id="channelList"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="skusPanel">
+        <div class="grid kpi-grid" id="skuKpis"></div>
+
+        <div class="product-layout">
+          <div class="card card-pad">
+            <h2 class="section-title">Products to review</h2>
+            <input class="search" id="productSearch" type="search" placeholder="Search SKU / EAN / product name" />
+            <div id="productList" style="margin-top:16px"></div>
+          </div>
+
+          <div class="card card-pad">
+            <h2 class="section-title">Selected product details</h2>
+            <div class="period-title" id="productDetailName">-</div>
+            <div class="period-sub" id="productDetailSku">-</div>
+            <div class="product-badges" id="productBadges"></div>
+            <div class="detail-kpis" id="productDetailKpis"></div>
+            <h3 class="section-title" style="font-size:15px">Reason split</h3>
+            <div id="productReasons"></div>
+            <h3 class="section-title" style="font-size:15px;margin-top:24px">Mostly from channel</h3>
+            <div id="productChannels"></div>
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+            <div>
+              <h2 class="section-title">Batch details</h2>
+            </div>
+            <button class="download-btn" type="button" id="downloadSkuRows">Download SKU rows</button>
+          </div>
+          <div class="table-wrap" style="margin-top:16px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Batch</th>
+                  <th>MFG</th>
+                  <th>EXP</th>
+                  <th>Channel</th>
+                  <th>Status</th>
+                  <th>Reason</th>
+                  <th>Units</th>
+                </tr>
+              </thead>
+              <tbody id="batchTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSismHdOKJigedmrPENc8HXyW4TvqHek7e1ASCluZfi1s3jgQPZGhYJQjb_F5IoarAnOmybH7aIqrWG/pub?gid=1227720756&single=true&output=csv";
+    const REFRESH_SECONDS = 300;
+    const COLORS = ["#3b73f6", "#f04438", "#f59e0b", "#14b8a6", "#7c3aed", "#10b981", "#64748b"];
+    const CHANNEL_OWNER_MAP = {
+      "Instamart": "Rishab Jain",
+      "Zepto": "Rishab Jain",
+      "Meesho": "Rupali Goel",
+      "Purplle": "Rupali Goel",
+      "BigBasket": "Rupali Goel",
+      "Amazon": "Kanishk Kothari",
+      "Amazon Now": "Kanishk Kothari",
+      "RK world": "Kanishk Kothari",
+      "R.K World": "Kanishk Kothari",
+      "Pillbox": "Kanishk Kothari",
+      "FirstCry": "Kanishk Kothari",
+      "Nykaa": "Harini Rathod",
+      "Myntra": "Harini Rathod",
+      "Tira": "Harini Rathod",
+      "Blinkit": "Anshul Bhatkar",
+      "Flipkart": "Nikhil Maheshwari",
+      "Flipkart Minutes": "Nikhil Maheshwari"
+    };
+
+    const state = {
+      rows: [],
+      filtered: [],
+      periodType: "week",
+      periodKey: "last",
+      selectedChannel: null,
+      selectedSkuKey: null,
+      productSearch: "",
+      countdown: REFRESH_SECONDS
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let value = "";
+      let quoted = false;
+      for (let i = 0; i < text.length; i += 1) {
+        const c = text[i];
+        const next = text[i + 1];
+        if (c === '"' && quoted && next === '"') {
+          value += '"';
+          i += 1;
+        } else if (c === '"') {
+          quoted = !quoted;
+        } else if (c === "," && !quoted) {
+          row.push(value);
+          value = "";
+        } else if ((c === "\n" || c === "\r") && !quoted) {
+          if (c === "\r" && next === "\n") i += 1;
+          row.push(value);
+          if (row.some((cell) => String(cell).trim() !== "")) rows.push(row);
+          row = [];
+          value = "";
+        } else {
+          value += c;
+        }
+      }
+      row.push(value);
+      if (row.some((cell) => String(cell).trim() !== "")) rows.push(row);
+      return rows;
+    }
+
+    function parseNumber(value) {
+      const n = Number(String(value || "").replace(/[^0-9.-]/g, ""));
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function normalizeStatus(value) {
+      const s = String(value || "").trim().toLowerCase();
+      if (["good", "ok"].includes(s)) return "Good";
+      if (["bad", "reject", "rejected"].includes(s)) return "Bad";
+      if (["rework", "repair"].includes(s)) return "Rework";
+      return "Unknown";
+    }
+
+    function parseDate(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return null;
+      const slash = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+      if (slash) {
+        const dd = Number(slash[1]);
+        const mm = Number(slash[2]);
+        const yy = Number(slash[3]);
+        const year = yy < 100 ? 2000 + yy : yy;
+        return new Date(year, mm - 1, dd);
+      }
+      const dash = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (dash) return new Date(Number(dash[1]), Number(dash[2]) - 1, Number(dash[3]));
+      const d = new Date(raw);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function dateKey(date) {
+      if (!date) return "";
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function displayDate(date) {
+      if (!date) return "-";
+      return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, " ");
+    }
+
+    function monthName(date) {
+      return date ? date.toLocaleDateString("en-GB", { month: "long" }) : "";
+    }
+
+    function monthKey(date) {
+      return date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}` : "";
+    }
+
+    function quarterKey(date) {
+      if (!date) return "";
+      const q = Math.floor(date.getMonth() / 3) + 1;
+      return `${date.getFullYear()}-Q${q}`;
+    }
+
+    function brandFromSku(sku) {
+      const s = String(sku || "").toUpperCase();
+      if (s.includes("MWMM") || s.startsWith("MM")) return "Man Matters";
+      if (s.includes("MWLJ") || s.startsWith("LJ")) return "Little Joys";
+      return "Be Bodywise";
+    }
+
+    function brandShort(name) {
+      if (name === "Man Matters") return "MM";
+      if (name === "Little Joys") return "LJ";
+      return "BB";
+    }
+
+    function brandColor(name) {
+      if (name === "Man Matters") return "var(--amber)";
+      if (name === "Little Joys") return "var(--teal)";
+      return "var(--purple)";
+    }
+
+    function fmtInt(value) {
+      return Math.round(value || 0).toLocaleString("en-IN");
+    }
+
+    function fmtPct(value) {
+      return `${Number(value || 0).toFixed(1)}%`;
+    }
+
+    function fmtValue(value) {
+      const n = Math.round(value || 0);
+      if (Math.abs(n) >= 10000000) return `Rs ${(n / 10000000).toFixed(1)}Cr`;
+      if (Math.abs(n) >= 100000) return `Rs ${(n / 100000).toFixed(1)}L`;
+      if (Math.abs(n) >= 1000) return `Rs ${(n / 1000).toFixed(1)}K`;
+      return `Rs ${fmtInt(n)}`;
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function dateBetween(date, start, end) {
+      return date && date >= start && date <= end;
+    }
+
+    function getMaxDate(rows) {
+      return rows.reduce((max, r) => (!max || r.date > max ? r.date : max), null);
+    }
+
+    function getDefaultWeekRange() {
+      const max = getMaxDate(state.rows) || new Date();
+      const end = addDays(max, -1);
+      const start = addDays(end, -6);
+      return { start, end, label: "Last completed week", key: "last" };
+    }
+
+    function aggregate(rows) {
+      return rows.reduce((acc, row) => {
+        acc.total += row.qty;
+        acc.value += row.value;
+        if (row.status === "Good") {
+          acc.good += row.qty;
+          acc.goodValue += row.value;
+        }
+        if (row.status === "Bad") {
+          acc.bad += row.qty;
+          acc.badValue += row.value;
+        }
+        if (row.status === "Rework") {
+          acc.rework += row.qty;
+          acc.reworkValue += row.value;
+        }
+        return acc;
+      }, { total: 0, value: 0, good: 0, bad: 0, rework: 0, goodValue: 0, badValue: 0, reworkValue: 0 });
+    }
+
+    function groupBy(rows, keyFn) {
+      const map = new Map();
+      rows.forEach((row) => {
+        const key = keyFn(row);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(row);
+      });
+      return map;
+    }
+
+    function topReasons(rows, limit = 5) {
+      const map = new Map();
+      rows.filter((r) => r.status !== "Good").forEach((r) => {
+        const reason = r.reason || "Not Available";
+        map.set(reason, (map.get(reason) || 0) + r.qty);
+      });
+      return Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, limit);
+    }
+
+    function buildPeriodOptions() {
+      const select = el("periodSelect");
+      select.innerHTML = "";
+      if (state.periodType === "week") {
+        const def = getDefaultWeekRange();
+        select.append(new Option("Last completed week", "last"));
+        const seen = new Set(["last"]);
+        state.rows.forEach((r) => {
+          const end = addDays(r.date, 6 - ((r.date.getDay() + 6) % 7));
+          const start = addDays(end, -6);
+          const key = `${dateKey(start)}_${dateKey(end)}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            select.append(new Option(`${displayDate(start)} - ${displayDate(end)}`, key));
+          }
+        });
+        state.periodKey = state.periodKey || def.key;
+      } else if (state.periodType === "month") {
+        const keys = Array.from(new Set(state.rows.map((r) => monthKey(r.date)).filter(Boolean))).sort();
+        keys.forEach((key) => {
+          const [year, month] = key.split("-");
+          const d = new Date(Number(year), Number(month) - 1, 1);
+          select.append(new Option(`${monthName(d)} ${year}`, key));
+        });
+        if (!keys.includes(state.periodKey)) state.periodKey = keys[keys.length - 1] || "";
+      } else if (state.periodType === "quarter") {
+        const keys = Array.from(new Set(state.rows.map((r) => quarterKey(r.date)).filter(Boolean))).sort();
+        keys.forEach((key) => select.append(new Option(key.replace("-", " "), key)));
+        if (!keys.includes(state.periodKey)) state.periodKey = keys[keys.length - 1] || "";
+      }
+      select.value = state.periodKey;
+      el("customDates").classList.toggle("show", state.periodType === "custom");
+      select.style.display = state.periodType === "custom" ? "none" : "block";
+    }
+
+    function currentRange() {
+      if (state.periodType === "week") {
+        if (state.periodKey === "last") return getDefaultWeekRange();
+        const [s, e] = state.periodKey.split("_");
+        return { start: parseDate(s), end: parseDate(e), label: "Selected week", key: state.periodKey };
+      }
+      if (state.periodType === "month") {
+        const [year, month] = state.periodKey.split("-").map(Number);
+        const start = new Date(year, month - 1, 1);
+        const end = new Date(year, month, 0);
+        return { start, end, label: `${monthName(start)} ${year}`, key: state.periodKey };
+      }
+      if (state.periodType === "quarter") {
+        const [yearText, qText] = state.periodKey.split("-Q");
+        const year = Number(yearText);
+        const q = Number(qText);
+        const start = new Date(year, (q - 1) * 3, 1);
+        const end = new Date(year, q * 3, 0);
+        return { start, end, label: `Q${q} ${year}`, key: state.periodKey };
+      }
+      const start = parseDate(el("startDate").value);
+      const end = parseDate(el("endDate").value);
+      return { start, end, label: "Custom period", key: "custom" };
+    }
+
+    function applyFilter() {
+      const range = currentRange();
+      state.filtered = state.rows.filter((r) => dateBetween(r.date, range.start, range.end));
+      el("periodTitle").textContent = range.label;
+      el("periodSub").textContent = `${displayDate(range.start)} - ${displayDate(range.end)}`;
+      renderActiveTab();
+    }
+
+    async function loadData() {
+      el("errorBox").style.display = "none";
+      el("metaText").textContent = "Fetching live QC data...";
+      const response = await fetch(`${CSV_URL}&t=${Date.now()}`);
+      if (!response.ok) throw new Error(`CSV fetch failed: ${response.status}`);
+      const text = await response.text();
+      const parsed = parseCSV(text);
+      const header = parsed.shift();
+      const rows = parsed.map((r) => {
+        const date = parseDate(r[2]);
+        const status = normalizeStatus(r[20]);
+        const qty = parseNumber(r[13]) || 0;
+        const value = parseNumber(r[16]) || (parseNumber(r[15]) * qty);
+        const sku = String(r[11] || "").trim();
+        return {
+          raw: r,
+          header,
+          monthText: r[1],
+          date,
+          channel: String(r[4] || "Not Available").trim() || "Not Available",
+          ean: String(r[10] || "").trim(),
+          sku,
+          product: String(r[12] || "Not Available").trim() || "Not Available",
+          qty,
+          cogs: parseNumber(r[15]),
+          value,
+          batch: String(r[17] || "Not Available").trim() || "Not Available",
+          mfg: String(r[18] || "Not Available").trim() || "Not Available",
+          exp: String(r[19] || "Not Available").trim() || "Not Available",
+          status,
+          reason: String(r[21] || "Not Available").trim() || "Not Available",
+          brand: brandFromSku(sku)
+        };
+      }).filter((r) => r.date && r.qty > 0 && ["Good", "Bad", "Rework"].includes(r.status));
+      state.rows = rows;
+      state.countdown = REFRESH_SECONDS;
+      buildPeriodOptions();
+      applyFilter();
+      el("metaText").textContent = `Live - ${fmtInt(rows.length)} records - Updated ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+
+    function renderKpi(target, cards) {
+      el(target).innerHTML = cards.map((card) => `
+        <div class="card">
+          <div class="accent ${card.color || ""}"></div>
+          <div class="card-pad">
+            <div class="metric-label">${card.label}</div>
+            <div class="metric">${card.value}</div>
+            <div class="metric-note">${card.note}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderOverview() {
+      const agg = aggregate(state.filtered);
+      const action = agg.bad + agg.rework;
+      const actionRows = state.filtered.filter((r) => r.status !== "Good");
+      const byChannel = Array.from(groupBy(state.filtered, (r) => r.channel).entries()).map(([channel, rows]) => {
+        const a = aggregate(rows);
+        return { channel, rows, ...a, action: a.bad + a.rework, actionValue: a.badValue + a.reworkValue };
+      }).sort((a, b) => b.action - a.action);
+      const priorityChannels = byChannel.filter((c) => c.action > 0).length;
+      renderKpi("overviewKpis", [
+        { label: "Returned Units", value: fmtInt(agg.total), note: "RTV volume for selected period", color: "" },
+        { label: "Bad + Rework", value: fmtInt(action), note: `${fmtPct(action / Math.max(agg.total, 1) * 100)} of returns`, color: "red" },
+        { label: "Bad + Rework Value", value: fmtValue(agg.badValue + agg.reworkValue), note: "Value linked to action units", color: "teal" },
+        { label: "Priority Channels", value: fmtInt(priorityChannels), note: "Channels needing follow-up", color: "amber" }
+      ]);
+
+      const brandRows = ["Be Bodywise", "Man Matters", "Little Joys"].map((brand) => {
+        const rows = state.filtered.filter((r) => r.brand === brand);
+        const a = aggregate(rows);
+        return { brand, ...a };
+      });
+      el("brandHealth").innerHTML = brandRows.map((b) => {
+        const badPct = b.bad / Math.max(b.total, 1) * 100;
+        const reworkPct = b.rework / Math.max(b.total, 1) * 100;
+        const goodPct = b.good / Math.max(b.total, 1) * 100;
+        return `
+          <div class="brand-card">
+            <div class="accent" style="background:${brandColor(b.brand)}"></div>
+            <div class="brand-inner">
+              <div class="brand-name">${b.brand}</div>
+              <div class="brand-cat">${brandShort(b.brand)}</div>
+              <div class="brand-stats">
+                <div>
+                  <div class="stat-val">${fmtInt(b.total)}</div>
+                  <div class="stat-label">Total units</div>
+                  <div class="stat-note">${fmtValue(b.value)}</div>
+                </div>
+                <div>
+                  <div class="stat-val red">${fmtInt(b.bad)}</div>
+                  <div class="stat-label">Bad units</div>
+                  <div class="stat-note">${fmtPct(badPct)} | ${fmtValue(b.badValue)}</div>
+                </div>
+                <div>
+                  <div class="stat-val amber">${fmtInt(b.rework)}</div>
+                  <div class="stat-label">Rework units</div>
+                  <div class="stat-note">${fmtPct(reworkPct)} | ${fmtValue(b.reworkValue)}</div>
+                </div>
+              </div>
+              <div class="brand-bar"><div class="bar-track"><div class="bar" style="width:${goodPct}%;background:var(--green)"></div></div></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const topChannel = byChannel[0] || {};
+      const reasons = topReasons(state.filtered, 5);
+      const topReason = reasons[0] || ["-", 0];
+      const topBrand = brandRows.sort((a, b) => (b.bad / Math.max(b.total, 1)) - (a.bad / Math.max(a.total, 1)))[0] || {};
+      el("attentionList").innerHTML = [
+        { title: topChannel.channel || "-", sub: "Highest Bad + Rework units", value: `${fmtInt(topChannel.action || 0)} units`, color: "red" },
+        { title: topReason[0], sub: "Largest repeated reason", value: `${fmtInt(topReason[1])} units`, color: "" },
+        { title: topBrand.brand || "-", sub: "Highest bad rate by brand", value: fmtPct((topBrand.bad || 0) / Math.max(topBrand.total || 1, 1) * 100), color: "amber" }
+      ].map((item) => `
+        <div class="signal-row">
+          <div class="dot ${item.color}"></div>
+          <div><div class="signal-title">${item.title}</div><div class="signal-sub">${item.sub}</div></div>
+          <div class="signal-val">${item.value}</div>
+        </div>
+      `).join("");
+
+      const maxReason = Math.max(...reasons.map((r) => r[1]), 1);
+      el("topReasons").innerHTML = reasons.length ? reasons.map((r, i) => `
+        <div class="reason-row">
+          <div class="reason-label">${r[0]}</div>
+          <div class="bar-track"><div class="bar" style="width:${(r[1] / maxReason) * 100}%;background:${COLORS[i % COLORS.length]}"></div></div>
+          <div class="reason-val">${fmtInt(r[1])}</div>
+        </div>
+      `).join("") : `<div class="empty">No Bad/Rework reasons in this period.</div>`;
+
+    }
+
+    function channelModels() {
+      return Array.from(groupBy(state.filtered, (r) => r.channel).entries()).map(([channel, rows]) => {
+        const a = aggregate(rows);
+        const reasons = topReasons(rows, 5);
+        return { channel, rows, ...a, action: a.bad + a.rework, actionValue: a.badValue + a.reworkValue, reasons };
+      }).filter((c) => c.total > 0).sort((a, b) => b.action - a.action || b.total - a.total);
+    }
+
+    function renderChannels() {
+      const models = channelModels();
+      if (!models.length) {
+        el("channelList").innerHTML = `<div class="empty">No channel data for this period.</div>`;
+        return;
+      }
+      el("channelList").innerHTML = models.map((c, index) => {
+        const top = c.reasons[0] || ["-", 0];
+        const maxReason = Math.max(...c.reasons.map((r) => r[1]), 1);
+        const reasonRows = c.reasons.length ? c.reasons.map((r, i) => `
+          <div class="reason-row">
+            <div class="reason-label">${r[0]}</div>
+            <div class="bar-track"><div class="bar" style="width:${r[1] / maxReason * 100}%;background:${COLORS[(i + 1) % COLORS.length]}"></div></div>
+            <div class="reason-val">${fmtInt(r[1])}</div>
+          </div>
+        `).join("") : `<div class="empty">No Bad/Rework reasons for this channel.</div>`;
+        return `
+          <details class="channel-accordion" ${index === 0 ? "open" : ""}>
+            <summary>
+              <div>
+                <div class="row-title">${c.channel}</div>
+                <div class="row-sub">${CHANNEL_OWNER_MAP[c.channel] || "Owner not mapped"}</div>
+              </div>
+              <div class="summary-metric">
+                <span>Returned</span>
+                <strong>${fmtInt(c.total)}</strong>
+              </div>
+              <div class="summary-metric">
+                <span>Bad</span>
+                <strong style="color:var(--red)">${fmtInt(c.bad)}</strong>
+                <small>${fmtValue(c.badValue)}</small>
+              </div>
+              <div class="summary-metric">
+                <span>Rework</span>
+                <strong style="color:var(--amber)">${fmtInt(c.rework)}</strong>
+                <small>${fmtValue(c.reworkValue)}</small>
+              </div>
+              <div class="summary-metric">
+                <span>Top reason</span>
+                <strong>${top[0]}</strong>
+                <small>${fmtInt(top[1])} units</small>
+              </div>
+              <span class="expand-label">Reasons</span>
+            </summary>
+            <div class="channel-reason-panel">${reasonRows}</div>
+          </details>
+        `;
+      }).join("");
+    }
+
+    function productModels() {
+      const map = new Map();
+      state.filtered.forEach((r) => {
+        const key = `${r.sku}|${r.product}`;
+        if (!map.has(key)) map.set(key, { key, sku: r.sku, product: r.product, brand: r.brand, ean: r.ean, rows: [] });
+        map.get(key).rows.push(r);
+      });
+      return Array.from(map.values()).map((p) => {
+        const a = aggregate(p.rows);
+        return { ...p, ...a, action: a.bad + a.rework, actionValue: a.badValue + a.reworkValue, reasons: topReasons(p.rows, 5) };
+      }).filter((p) => p.action > 0).sort((a, b) => b.action - a.action || b.actionValue - a.actionValue);
+    }
+
+    function setSelectedProduct(key) {
+      state.selectedSkuKey = key;
+      renderSkus();
+    }
+
+    function renderSkus() {
+      const all = productModels();
+      const filteredProducts = state.productSearch
+        ? all.filter((p) => `${p.sku} ${p.product} ${p.ean}`.toLowerCase().includes(state.productSearch.toLowerCase()))
+        : all;
+      if (!state.selectedSkuKey || !all.some((p) => p.key === state.selectedSkuKey)) {
+        state.selectedSkuKey = all[0]?.key || null;
+      }
+      const selected = all.find((p) => p.key === state.selectedSkuKey) || all[0];
+      const channelCount = new Set(state.filtered.map((r) => r.channel)).size;
+      const topSku = all[0] || { action: 0 };
+      const badReasonUnits = state.filtered.filter((r) => r.status === "Bad").reduce((s, r) => s + r.qty, 0);
+      renderKpi("skuKpis", [
+        { label: "Products To Review", value: fmtInt(all.length), note: "SKUs with Bad + Rework units", color: "" },
+        { label: "Bad Reason Units", value: fmtInt(badReasonUnits), note: "Bad units needing follow-up", color: "amber" },
+        { label: "Top SKU Units", value: fmtInt(topSku.action), note: "Highest selected-period SKU", color: "red" },
+        { label: "Affected Channels", value: fmtInt(channelCount), note: "Channels linked to SKU issues", color: "teal" }
+      ]);
+
+      el("productList").innerHTML = filteredProducts.length ? filteredProducts.slice(0, 14).map((p) => {
+        const top = p.reasons[0] || ["-", 0];
+        return `
+          <div class="product-row ${p.key === state.selectedSkuKey ? "active" : ""}" data-key="${encodeURIComponent(p.key)}">
+            <div class="truncate"><div class="row-title truncate">${p.product}</div><div class="row-sub truncate">${p.sku}</div></div>
+            <div class="row-title">${fmtInt(p.action)}</div>
+            <div class="row-sub hide-mobile">${top[0]}</div>
+            <div class="row-sub hide-mobile">${topChannelForRows(p.rows)}</div>
+          </div>
+        `;
+      }).join("") : `<div class="empty">No product found for this search.</div>`;
+      document.querySelectorAll(".product-row").forEach((row) => {
+        row.addEventListener("click", () => setSelectedProduct(decodeURIComponent(row.dataset.key)));
+      });
+
+      if (!selected) {
+        el("productDetailName").textContent = "-";
+        el("productDetailSku").textContent = "-";
+        el("productBadges").innerHTML = "";
+        el("productDetailKpis").innerHTML = "";
+        el("productReasons").innerHTML = `<div class="empty">No selected product.</div>`;
+        el("productChannels").innerHTML = "";
+        el("batchTable").innerHTML = "";
+        return;
+      }
+      el("productDetailName").textContent = selected.product;
+      el("productDetailSku").textContent = `SKU ${selected.sku || "-"} | EAN ${selected.ean || "-"}`;
+      el("productBadges").innerHTML = `
+        <span class="badge">${selected.brand}</span>
+        <span class="badge"><span class="dot red"></span>Bad + Rework</span>
+        <span class="badge">${el("periodTitle").textContent}</span>
+      `;
+      renderKpi("productDetailKpis", [
+        { label: "Bad + Rework Units", value: fmtInt(selected.action), note: "Selected product", color: "red" },
+        { label: "Top Reason", value: selected.reasons[0]?.[0] || "-", note: "Largest reason", color: "amber" },
+        { label: "Top Channel", value: topChannelForRows(selected.rows), note: "Largest channel", color: "" },
+        { label: "Value Impact", value: fmtValue(selected.actionValue), note: "Bad + Rework value", color: "teal" }
+      ]);
+      const maxReason = Math.max(...selected.reasons.map((r) => r[1]), 1);
+      el("productReasons").innerHTML = selected.reasons.map((r, i) => `
+        <div class="reason-row">
+          <div class="reason-label">${r[0]}</div>
+          <div class="bar-track"><div class="bar" style="width:${r[1] / maxReason * 100}%;background:${COLORS[(i + 2) % COLORS.length]}"></div></div>
+          <div class="reason-val">${fmtInt(r[1])}</div>
+        </div>
+      `).join("");
+      const channelRows = Array.from(groupBy(selected.rows.filter((r) => r.status !== "Good"), (r) => r.channel).entries()).map(([channel, rows]) => ({ channel, qty: rows.reduce((s, r) => s + r.qty, 0) })).sort((a, b) => b.qty - a.qty).slice(0, 4);
+      const maxChannel = Math.max(...channelRows.map((r) => r.qty), 1);
+      el("productChannels").innerHTML = channelRows.map((r, i) => `
+        <div class="reason-row">
+          <div class="reason-label">${r.channel}</div>
+          <div class="bar-track"><div class="bar" style="width:${r.qty / maxChannel * 100}%;background:${COLORS[i % COLORS.length]}"></div></div>
+          <div class="reason-val">${fmtInt(r.qty)}</div>
+        </div>
+      `).join("");
+      el("batchTable").innerHTML = selected.rows.filter((r) => r.status !== "Good").slice(0, 20).map((r) => `
+        <tr>
+          <td><strong>${r.batch}</strong></td>
+          <td>${r.mfg}</td>
+          <td>${r.exp}</td>
+          <td>${r.channel}</td>
+          <td style="color:${r.status === "Bad" ? "var(--red)" : "var(--amber)"}">${r.status}</td>
+          <td>${r.reason}</td>
+          <td><strong>${fmtInt(r.qty)}</strong></td>
+        </tr>
+      `).join("");
+    }
+
+    function topChannelForRows(rows) {
+      const grouped = Array.from(groupBy(rows.filter((r) => r.status !== "Good"), (r) => r.channel).entries()).map(([channel, list]) => ({ channel, qty: list.reduce((s, r) => s + r.qty, 0) })).sort((a, b) => b.qty - a.qty);
+      return grouped[0]?.channel || "-";
+    }
+
+    function downloadCsv(filename, rows) {
+      const header = ["Open / QC Date", "Channel Name", "EAN", "SKU", "Product Name", "Qty", "Batch", "MFG Date", "EXP Date", "Status", "Rejection Reason"];
+      const lines = [header, ...rows.map((r) => [dateKey(r.date), r.channel, r.ean, r.sku, r.product, r.qty, r.batch, r.mfg, r.exp, r.status, r.reason])];
+      const csv = lines.map((line) => line.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function renderActiveTab() {
+      const active = document.querySelector(".tab.active")?.dataset.tab || "overview";
+      if (active === "overview") renderOverview();
+      if (active === "channels") renderChannels();
+      if (active === "skus") renderSkus();
+    }
+
+    function setTab(tabName) {
+      document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === tabName));
+      document.querySelectorAll(".panel").forEach((panel) => panel.classList.remove("active"));
+      el(`${tabName}Panel`).classList.add("active");
+      renderActiveTab();
+    }
+
+    function setupEvents() {
+      document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => setTab(tab.dataset.tab)));
+      document.querySelectorAll(".seg").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".seg").forEach((b) => b.classList.remove("active"));
+          button.classList.add("active");
+          state.periodType = button.dataset.period;
+          state.periodKey = state.periodType === "week" ? "last" : "";
+          buildPeriodOptions();
+          applyFilter();
+        });
+      });
+      el("periodSelect").addEventListener("change", (e) => {
+        state.periodKey = e.target.value;
+        applyFilter();
+      });
+      el("startDate").addEventListener("change", applyFilter);
+      el("endDate").addEventListener("change", applyFilter);
+      el("refreshBtn").addEventListener("click", () => loadData().catch(showError));
+      el("productSearch").addEventListener("input", (e) => {
+        state.productSearch = e.target.value;
+        renderSkus();
+      });
+      el("downloadChannelCsv").addEventListener("click", () => {
+        downloadCsv("rtv_qc_selected_period_raw.csv", state.filtered);
+      });
+      el("downloadSkuRows").addEventListener("click", () => {
+        const selected = productModels().find((p) => p.key === state.selectedSkuKey);
+        if (selected) downloadCsv(`${selected.sku || "sku"}_raw_rows.csv`, selected.rows);
+      });
+    }
+
+    function showError(error) {
+      const box = el("errorBox");
+      box.textContent = error.message || String(error);
+      box.style.display = "block";
+      el("metaText").textContent = "Could not load live data";
+    }
+
+    function startCountdown() {
+      setInterval(() => {
+        state.countdown -= 1;
+        if (state.countdown <= 0) {
+          loadData().catch(showError);
+          state.countdown = REFRESH_SECONDS;
+        }
+        const mins = Math.floor(state.countdown / 60);
+        const secs = String(state.countdown % 60).padStart(2, "0");
+        el("countdownText").textContent = `Next: ${mins}:${secs}`;
+      }, 1000);
+    }
+
+    async function init() {
+      setupEvents();
+      try {
+        await loadData();
+        const def = getDefaultWeekRange();
+        el("startDate").value = dateKey(def.start);
+        el("endDate").value = dateKey(def.end);
+      } catch (error) {
+        showError(error);
+      }
+      startCountdown();
+    }
+
+    init();
+  </script>
+</body>
+</html>
