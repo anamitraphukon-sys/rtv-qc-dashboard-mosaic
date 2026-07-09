@@ -1064,10 +1064,37 @@
       return date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}` : "";
     }
 
+    function fyLabel(fyStart) {
+      const start = String(fyStart).slice(-2);
+      const end = String(fyStart + 1).slice(-2);
+      return `FY${start}-${end}`;
+    }
+
+    function financialQuarterInfo(date) {
+      if (!date) return null;
+      const month = date.getMonth();
+      if (month >= 3 && month <= 5) return { fyStart: date.getFullYear(), quarter: 1, startMonth: 3, year: date.getFullYear(), months: "Apr-Jun" };
+      if (month >= 6 && month <= 8) return { fyStart: date.getFullYear(), quarter: 2, startMonth: 6, year: date.getFullYear(), months: "Jul-Sep" };
+      if (month >= 9) return { fyStart: date.getFullYear(), quarter: 3, startMonth: 9, year: date.getFullYear(), months: "Oct-Dec" };
+      return { fyStart: date.getFullYear() - 1, quarter: 4, startMonth: 0, year: date.getFullYear(), months: "Jan-Mar" };
+    }
+
     function quarterKey(date) {
-      if (!date) return "";
-      const q = Math.floor(date.getMonth() / 3) + 1;
-      return `${date.getFullYear()}-Q${q}`;
+      const info = financialQuarterInfo(date);
+      return info ? `${info.fyStart}-Q${info.quarter}` : "";
+    }
+
+    function quarterRange(key) {
+      const [fyText, qText] = key.split("-Q");
+      const fyStart = Number(fyText);
+      const quarter = Number(qText);
+      const startMonths = [3, 6, 9, 0];
+      const months = ["Apr-Jun", "Jul-Sep", "Oct-Dec", "Jan-Mar"];
+      const startMonth = startMonths[quarter - 1];
+      const year = quarter === 4 ? fyStart + 1 : fyStart;
+      const start = new Date(year, startMonth, 1);
+      const end = new Date(year, startMonth + 3, 0);
+      return { start, end, label: `Q${quarter} ${fyLabel(fyStart)} (${months[quarter - 1]})`, key };
     }
 
     function brandFromSku(sku) {
@@ -1197,7 +1224,7 @@
         if (!keys.includes(state.periodKey)) state.periodKey = keys[keys.length - 1] || "";
       } else if (state.periodType === "quarter") {
         const keys = Array.from(new Set(state.rows.map((r) => quarterKey(r.date)).filter(Boolean))).sort();
-        keys.forEach((key) => select.append(new Option(key.replace("-", " "), key)));
+        keys.forEach((key) => select.append(new Option(quarterRange(key).label, key)));
         if (!keys.includes(state.periodKey)) state.periodKey = keys[keys.length - 1] || "";
       }
       select.value = state.periodKey;
@@ -1218,12 +1245,7 @@
         return { start, end, label: `${monthName(start)} ${year}`, key: state.periodKey };
       }
       if (state.periodType === "quarter") {
-        const [yearText, qText] = state.periodKey.split("-Q");
-        const year = Number(yearText);
-        const q = Number(qText);
-        const start = new Date(year, (q - 1) * 3, 1);
-        const end = new Date(year, q * 3, 0);
-        return { start, end, label: `Q${q} ${year}`, key: state.periodKey };
+        return quarterRange(state.periodKey);
       }
       const start = parseDate(el("startDate").value);
       const end = parseDate(el("endDate").value);
