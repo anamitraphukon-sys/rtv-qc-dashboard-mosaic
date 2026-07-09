@@ -893,7 +893,7 @@
         </div>
 
         <div class="card card-pad" style="margin-bottom:18px">
-            <h2 class="section-title">Top issue types overall</h2>
+            <h2 class="section-title">Top return causes</h2>
           <div id="topReasons"></div>
         </div>
       </section>
@@ -930,7 +930,7 @@
             <div class="period-sub" id="productDetailSku">-</div>
             <div class="product-badges" id="productBadges"></div>
             <div class="detail-kpis" id="productDetailKpis"></div>
-            <h3 class="section-title" style="font-size:15px">Issue split</h3>
+            <h3 class="section-title" style="font-size:15px">Return cause split</h3>
             <div id="productReasons"></div>
             <h3 class="section-title" style="font-size:15px;margin-top:24px">Mostly from channel</h3>
             <div id="productChannels"></div>
@@ -1376,7 +1376,7 @@
       const topBrand = brandRows.sort((a, b) => (b.bad / Math.max(b.total, 1)) - (a.bad / Math.max(a.total, 1)))[0] || {};
       el("attentionList").innerHTML = [
         { title: topChannel.channel || "-", sub: "Highest Bad + Rework units", value: `${fmtInt(topChannel.action || 0)} units`, color: "red" },
-        { title: topReason[0], sub: "Largest repeated issue", value: `${fmtInt(topReason[1])} units`, color: "" },
+        { title: topReason[0], sub: "Most frequent return cause", value: `${fmtInt(topReason[1])} units`, color: "" },
         { title: topBrand.brand || "-", sub: "Highest bad rate by brand", value: fmtPct((topBrand.bad || 0) / Math.max(topBrand.total || 1, 1) * 100), color: "amber" }
       ].map((item) => `
         <div class="signal-row">
@@ -1443,11 +1443,11 @@
                 <small>${fmtMaybeValue(c.reworkValue)}</small>
               </div>
               <div class="summary-metric">
-                <span>Main issue</span>
+                <span>Top cause</span>
                 <strong>${top[0]}</strong>
                 <small>${fmtInt(top[1])} units</small>
               </div>
-              <span class="expand-label">Issue mix</span>
+              <span class="expand-label">View breakdown</span>
             </summary>
             <div class="channel-reason-panel">${reasonRows}</div>
           </details>
@@ -1526,7 +1526,7 @@
       `;
       renderKpi("productDetailKpis", [
         { label: "Bad + Rework Units", value: fmtInt(selected.action), note: "Selected product", color: "red" },
-        { label: "Main Issue", value: selected.reasons[0]?.[0] || "-", note: "Largest issue type", color: "amber" },
+        { label: "Top Cause", value: selected.reasons[0]?.[0] || "-", note: "Most frequent cause", color: "amber" },
         { label: "Top Channel", value: topChannelForRows(selected.rows), note: "Largest channel", color: "" },
         { label: "Value Impact", value: fmtMaybeValue(selected.actionValue), note: "Bad + Rework value", color: "teal" }
       ]);
