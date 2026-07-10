@@ -672,6 +672,7 @@
       line-height: 1.15;
       font-weight: 950;
       overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .product-title {
@@ -1304,12 +1305,13 @@
     }
 
     function renderKpi(target, cards) {
+      const compact = target === "productDetailKpis";
       el(target).innerHTML = cards.map((card) => `
-        <div class="card">
+        <div class="${compact ? "detail-kpi" : "card"}">
           <div class="accent ${card.color || ""}"></div>
-          <div class="card-pad">
+          <div class="${compact ? "body" : "card-pad"}">
             <div class="metric-label">${card.label}</div>
-            <div class="metric">${card.value}</div>
+            <div class="${compact ? "detail-value" : "metric"}">${card.value}</div>
             <div class="metric-note">${card.note}</div>
           </div>
         </div>
